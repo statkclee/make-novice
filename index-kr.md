@@ -3,51 +3,44 @@ layout: lesson
 title: 자동화와 Make
 ---
 
-Make is a tool which can run commands to read files, process these
-files in some way, and write out the processed files. For example,
-in software development, Make is used to compile source code
-into executable programs or libraries, but Make can also be used
-to:
+Make는 파일을 읽어들이고, 특정 방식으로 읽어들인 파일을 처리하고, 처리결과를 파일에 적을 수 있는 명령어를 실행하는 도구다.
+예를 들어, 소프트웨어 개발에서, Make를 사용해서 소스 코드를 컴파일하고 실행가능한 프로그램 혹은 라이브러리로 만들 수 있다.
+하지만, Make를 사용해서 다음도 할 수 있다:
 
-* run analysis scripts on raw data files to get data files that
-  summarize the raw data;
-* run visualisation scripts on data files to produce plots; and to
-* parse and combine text files and plots to create papers.
+* 원데이터를 요악햐는 분석용 데이터 파일을 얻는데, 원데이터 파일에 분석 스크립트를 실행한다.
+* 그래프를 그려 도식화하는데, 필요한 데이터 파일에 시각화 스크립트를 실행한다.
+* 텍스트 파일과 그림을 파싱하고 조합해서 논문을 자동 생성한다.
 
-Make is called a build tool - it builds data files, plots, papers,
-programs or libraries. It can also update existing files if
-desired.
+Make를 빌드 도구라고 부른다 --- Make는 데이터 파일, 그래프, 논문, 프로그램 혹은 라이브러리를 구축(build)한다.
+원한다면, 기존에 존재하는 파일도 갱신할 수 있다.
 
-Make tracks the dependencies between the files it creates and the
-files used to create these. If one of the original files (e.g. a data
-file) is changed, then Make knows to recreate, or update, the files
-that depend upon this file (e.g. a plot).
+Make는 Make가 생성한 파일과 이를 생성하는데 사용된 파일에 대한 의존성을 추적한다.
+만약 원본 파일 (예를 들어, 데이터 파일) 중 하나가 변경되면, Make는 알아서 원본파일에 의존성을 갖는 파일(예를 들어, 그래프)을
+재생성하고 갱신한다.
 
-There are now many build tools available, all of which are based on
-the same concepts as Make.
+현재 빌드 도구는 많이 있다. 하지만, 시장에 나온 모든 빌드 도구는 Make와 같은 개념에 기초하고 있다.
 
-> ## Prerequisites {.prereq}
+> ## 전제조건 {.prereq}
 >
-> In this lesson we use `make` from the Unix Shell. Some previous
-> experience with using the shell to list directories, create, copy,
-> remove and list files and directories, and run simple scripts is
-> necessary.
+> 이번 학습에서 유닉스 쉘에서 나온 `make`를 사용한다.
+> 쉘을 사용해서 디렉토리 목록을 살펴보고, 파일과 디렉토리를 생성, 복사, 삭제, 볼 수 있고,
+> 간단한 스크립트를 실행해본 이전 경혐이 일부 필요하다.
 
-> ## Getting ready {.getready}
+> ## 사전 준비 {.getready}
 >
-> You need to download some files to follow this lesson:
+> 이번 학습을 따라가는데 다음 파일을 다운로드한다:
 > 
-> 1. Download [make-lesson.tar.gz](./make-lesson.tar.gz).
-> 2. Move `make-lesson.tar.gz` into a directory which you can access via your bash shell.
-> 3. Open a bash shell window.
-> 4. Navigate to the directory where you downloaded the file.
-> 5. Unpack `make-lesson.tar.gz`:
+> 1. [make-lesson.tar.gz](./make-lesson.tar.gz) 파일을 다운로드한다.
+> 2. `make-lesson.tar.gz` 파일을 배쉬 쉘(bash shell)을 경우해서 접근할 수 있는 디렉토리로 이동한다.
+> 3. 배쉬 쉘 윈도우를 연다.
+> 4. 파일을 다운로드한 디렉토리로 이동한다.
+> 5. `make-lesson.tar.gz` 압축 파일을 다음 명령어로 푼다:
 >
 > ~~~ {.bash}
 > $ tar -xvf make-lesson.tar.gz
 > ~~~
 >
-> 6. Change into the `make-lesson` directory:
+> 6. 작업 디렉토리를 `make-lesson` 디렉토리로 변경한다:
 >
 > ~~~ {.bash}
 > $ cd make-lesson
