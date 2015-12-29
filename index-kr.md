@@ -1,6 +1,6 @@
 ---
 layout: lesson
-title: Automation and Make
+title: 자동화와 Make
 ---
 
 Make is a tool which can run commands to read files, process these
@@ -53,20 +53,21 @@ the same concepts as Make.
 > $ cd make-lesson
 > ~~~
 
-## Topics
+## 학습주제
+|   한국어(Korean)      |    영어(English)            |
+|------------------------|---------------------------|
+| 1.  [들어가며](01-intro-kr.html)                                                |1.  [Introduction](01-intro.html)|
+| 2.  [Makefiles](02-makefiles-kr.html)                                           |2.  [Makefiles](02-makefiles.html)|
+| 3.  [자동변수](03-variables-kr.html)                            |3.  [Automatic variables](03-variables.html)|
+| 4.  [데이터와 코드 의존성](04-dependencies-kr.html) |4.  [Dependencies on data and code](04-dependencies.html)|
+| 5.  [패턴 규칙](05-patterns-kr.html)                                        |5.  [Pattern rules](05-patterns.html)|
+| 6.  [변수](06-variables-kr.html)                                            |6.  [Variables](06-variables.html)|
+| 7.  [함수](07-functions-kr.html)                                            |7.  [Functions](07-functions.html)|
+| 8.  [결론](08-conclusion-kr.html)                                       |8.  [Conclusion](08-conclusion.html)|
 
-1.  [Introduction](01-intro.html)
-2.  [Makefiles](02-makefiles.html)
-3.  [Automatic variables](03-variables.html)
-4.  [Dependencies on data and code](04-dependencies.html)
-5.  [Pattern rules](05-patterns.html)
-6.  [Variables](06-variables.html)
-7.  [Functions](07-functions.html)
-8.  [Conclusion](08-conclusion.html)
+## 추가 학습교재       
 
-## Other Resources
-
-*   [Reference](reference.html)
-*   [Discussion](discussion.html)
-*   [Instructor's Guide](instructors.html)
-*   [Solutions](solutions.html)
+*   [참고문헌](reference.html)
+*   [토론](discussion.html)
+*   [강사 안내서](instructors.html)
+*   [해답](solutions.html)
