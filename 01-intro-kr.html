@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8">
+    <meta name="generator" content="pandoc">
+    <title>Software Carpentry: 자동화와 Make</title>
+    <link rel="shortcut icon" type="image/x-icon" href="/favicon.ico" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link rel="stylesheet" type="text/css" href="css/bootstrap/bootstrap.css" />
+    <link rel="stylesheet" type="text/css" href="css/bootstrap/bootstrap-theme.css" />
+    <link rel="stylesheet" type="text/css" href="css/swc.css" />
+    <link rel="alternate" type="application/rss+xml" title="Software Carpentry Blog" href="http://software-carpentry.org/feed.xml"/>
+    <meta charset="UTF-8" />
+    <!-- HTML5 shim, for IE6-8 support of HTML5 elements -->
+    <!--[if lt IE 9]>
+      <script src="http://html5shim.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
+  </head>
+  <body class="lesson">
+    <div class="container card">
+      <div class="banner">
+        <a href="http://software-carpentry.org" title="Software Carpentry">
+          <img alt="Software Carpentry banner" src="img/software-carpentry-banner.png" />
+        </a>
+      </div>
+      <article>
+      <div class="row">
+        <div class="col-md-10 col-md-offset-1">
+                    <a href="index.html"><h1 class="title">자동화와 Make</h1></a>
+          <h2 class="subtitle">들어가며</h2>
+          <section class="objectives panel panel-warning">
+<div class="panel-heading">
+<h2><span class="glyphicon glyphicon-certificate"></span>학습 목표</h2>
+</div>
+<div class="panel-body">
+<ul>
+<li>Make가 무엇을 위한 것인지 설명한다.</li>
+<li>Make가 왜 쉘 스크립트와 다른지 설명한다.</li>
+<li>인기있는 다른 빌드 도구를 살펴본다.</li>
+</ul>
+</div>
+</section>
+<p>텍스트 파일을 읽어 들이고, 텍스트에 단어갯수를 세고, 출력을 데이터 파일에 저장하는 <code>wordcount.py</code> 스크립트가 있다고 가정하자:</p>
+<pre class="sourceCode bash"><code class="sourceCode bash">$ <span class="kw">python</span> wordcount.py books/isles.txt isles.dat</code></pre>
+<p><code>head</code> 명령어를 사용해서 데이터 파일 첫 5행을 살펴본다면,</p>
+<pre class="sourceCode bash"><code class="sourceCode bash">$ <span class="kw">head</span> -5 isles.dat</code></pre>
+<p><code>isles.dat</code> 파일이 단어마다 한줄씩 구성된 것을 볼 수 있다.</p>
+<pre class="output"><code>the 3822 6.7371760973
+of 2460 4.33632998414
+and 1723 3.03719372466
+to 1479 2.60708619778
+a 1308 2.30565838181</code></pre>
+<p>각 행은, 단어 자체, 해당 단어 출현횟수, 출현횟수를 텍스트 파일에 전체 단어 갯수에 대한 백분율로 나타낸다. 또다른 예제로:</p>
+<pre class="sourceCode bash"><code class="sourceCode bash">$ <span class="kw">python</span> wordcount.py books/abyss.txt abyss.dat
+$ <span class="kw">head</span> -5 abyss.dat</code></pre>
+<pre class="output"><code>the 4044 6.35449402891
+and 2807 4.41074795726
+of 1907 2.99654305468
+a 1594 2.50471401634
+to 1515 2.38057825267</code></pre>
+<aside class="callout panel panel-info">
+<div class="panel-heading">
+<h2><span class="glyphicon glyphicon-pushpin"></span>지프의 법칙(Zipf’s Law)</h2>
+</div>
+<div class="panel-body">
+<p>가장 자주 출현하는 단어는 두번째 가장 자주 출현하는 단어보다 거의 두배 나타난다. 이를 <a href="https://ko.wikipedia.org/wiki/지프의_법칙">지프의 법칙</a>, <a href="http://en.wikipedia.org/wiki/Zipf%27s_law">Zipf’s Law</a>이라고 부른다.</p>
+</div>
+</aside>
+<p><code>plotcount.py</code> 스크립트는 데이터 파일을 읽어들여, 가장 자주 출현하는 10 단어를 도식화한다:</p>
+<pre class="sourceCode bash"><code class="sourceCode bash">$ <span class="kw">python</span> plotcount.py isles.dat show</code></pre>
+<p>윈도우를 닫아 그래프를 빠져나온다.</p>
+<p><code>plotcount.py</code>로 그래프를 이미지(예, JPEG)로 저장할 수도 있다:</p>
+<pre class="sourceCode bash"><code class="sourceCode bash">$ <span class="kw">python</span> plotcount.py isles.dat isles.jpg</code></pre>
+<p>상기 스크립트를 합하면, 작업흐름은 다음을 구현한 것이 된다:</p>
+<ol style="list-style-type: decimal">
+<li>데이터 파일을 읽어들인다.</li>
+<li>해당 데이터 파일에 분석을 실시한다.</li>
+<li>분석 결과를 신규 파일에 저장한다.</li>
+<li>분석 결과에 대한 그래프를 그려 도식화한다.</li>
+<li>이미지 파일로 그래프를 저장해서, 논문에 삽입할 수 있게 된다.</li>
+</ol>
+<p>지금까지 작업을 수행한 것처럼, 쉘 프롬프트에서 <code>wordcount.py</code> 와 <code>plotcount.py</code> 스크립트를 파일 한둘에 작업하는 것은 문제 없다. 하지만, 텍스트 파일이 5개, 10개, 20개가 된다면, 이런 작업은 급격히 단조로워진다. 쉘 스크립트를 작성해서 텍스트 파일에 루프를 둘려, 결과값을 텍스트 파일에 저장하고, 순서대로 그래프를 생성할 수 있지만, 이러한 접근방법도 문제를 일으킬 수 있다. 만약 텍스트 파일이 변경되면, 모든 파일이 아니라 변경된 텍스트 파일에 대해서만 분석을 다시 실행해야 하고, 그래프를 다시 생성해야만 된다. 더욱이, 텍스트 파일이 변경되기만 하면 그럴때마다 이런 작업을 수행하고자 한다.</p>
+<p><a href="http://www.gnu.org/software/make/">Make</a>(GNU Make로도 알려짐)는 빠르고, 자유롭게 사용가능하고, 무료이며, 문서화가 잘된 <a href="reference.html#build-manager">빌드 관리자(build manager)</a>다. Make는 1977년 벨 연구소 여름 인턴으로 근무한 Stuart Feldman에 의해 개발되었고, 오늘날까지 널리 사용되고 있다. Make는 분석을 실행하고, 결과를 도식화하는데 필요한 명령어를 실행한다. 쉘스크립트처럼, 단일 쉘 명령어를 통해, 복잡한 순서 명령어를 실행할 수 있다. 쉘스크립트와 달리, 명시적으로 파일 사이에 존재하는 의존성을 기록해서, 텍스트 파일이 변경될 때, 데이터 파일 혹은 이미지 파일을 언제 다시 재생성할지 결정할 수 있다. 새로운 파일을 생성하는데, 파일을 처리하는 일반적인 패턴을 따르는 어떤 명령어에도 Make를 사용할 수 있다. 예를 들어:</p>
+<ul>
+<li>원데이터 파일에 분석 스크립트를 실행해서, 원 데이터를 요약하는 데이터를 생성한다.</li>
+<li>상기 데이터에 시각화 스크립트를 실행해서, 그래프를 생성한다.</li>
+<li>텍스트와 그래프를 파싱하고 조합해서 논문을 생성한다.</li>
+<li>소스코드를 컴파일해서 실행 프로그램 혹은 라이브러리를 생성한다.</li>
+</ul>
+<p>시중에 이용가능한 빌드 도구가 많이 있다. 예를 들어, <a href="http://ant.apache.org/">Apache ANT</a>, <a href="http://pydoit.org/">doit</a>, 윈도우용 <a href="https://msdn.microsoft.com/en-us/library/dd9y37ha.aspx">nmake</a>가 있다. 이런 빌드 도구를 사용하는 스크립트를 빌드하는 빌드 도구도 있다. 예를 들어, <a href="http://www.gnu.org/software/autoconf/autoconf.html">GNU Autoconf</a>와 <a href="http://www.cmake.org/">CMake</a>가 있다. 어떤 도구가 최선인지는 요구사항, 사용 의도, 운영체제에 달려있다. 하지만, 거의 모든 빌드 도구는 Make와 동일한 기본 개념을 공유하고 있다.</p>
+<aside class="callout panel panel-info">
+<div class="panel-heading">
+<h2><span class="glyphicon glyphicon-pushpin"></span>거의 40살이 된 Make를 왜 사용할까?</h2>
+</div>
+<div class="panel-body">
+<p>오늘날, 고성능 컴퓨팅에 매우 일반적인 언어인 C 혹은 포트란 레거시 코드를 갖고 작업한 연구원은 아마도 Make를 접해봤을 것 같다.</p>
+<p>재현가능한 연구 작업흐름을 구현하거나, (R 혹은 파이썬을 사용해서) 자료분석과 시각화 작업을 자동화하거나, 텍스트를 가지고 표와 그래프를 조합해서 데출판을 위한 보고서와 논문을 작업하는데, Make를 사용했을 것이다.</p>
+<p>Make의 기본적인 개념은 거의 모든 빌드도구에 공통이다.</p>
+</div>
+</aside>
+<p><a href="http://www.gnu.org/software/make/">GNU Make</a>는 빠르고, 자유롭게 사용가능하고, 무료이며, 문서화가 잘 정비되어 있고, 매우 인기가 있고, Make 를 구현한 것 중 하나를 매우 잘 확장하고 있다. 이제부터, GNU Make에 집중한다. 따라서, Make를 언급하면, GNU Make를 의미한다.</p>
+        </div>
+      </div>
+      </article>
+      <div class="footer">
+        <a class="label swc-blue-bg" href="http://software-carpentry.org">Software Carpentry</a>
+        <a class="label swc-blue-bg" href="https://github.com/swcarpentry/lesson-template">Source</a>
+        <a class="label swc-blue-bg" href="mailto:admin@software-carpentry.org">Contact</a>
+        <a class="label swc-blue-bg" href="LICENSE.html">License</a>
+      </div>
+    </div>
+    <!-- Javascript placed at the end of the document so the pages load faster -->
+    <script src="http://software-carpentry.org/v5/js/jquery-1.9.1.min.js"></script>
+    <script src="css/bootstrap/bootstrap-js/bootstrap.js"></script>
+  </body>
+</html>
