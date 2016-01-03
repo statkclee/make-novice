@@ -1,0 +1,223 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8">
+    <meta name="generator" content="pandoc">
+    <title>Software Carpentry: 자동화와 Make</title>
+    <link rel="shortcut icon" type="image/x-icon" href="/favicon.ico" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link rel="stylesheet" type="text/css" href="css/bootstrap/bootstrap.css" />
+    <link rel="stylesheet" type="text/css" href="css/bootstrap/bootstrap-theme.css" />
+    <link rel="stylesheet" type="text/css" href="css/swc.css" />
+    <link rel="alternate" type="application/rss+xml" title="Software Carpentry Blog" href="http://software-carpentry.org/feed.xml"/>
+    <meta charset="UTF-8" />
+    <!-- HTML5 shim, for IE6-8 support of HTML5 elements -->
+    <!--[if lt IE 9]>
+      <script src="http://html5shim.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
+  </head>
+  <body class="lesson">
+    <div class="container card">
+      <div class="banner">
+        <a href="http://software-carpentry.org" title="Software Carpentry">
+          <img alt="Software Carpentry banner" src="img/software-carpentry-banner.png" />
+        </a>
+      </div>
+      <article>
+      <div class="row">
+        <div class="col-md-10 col-md-offset-1">
+                    <a href="index.html"><h1 class="title">자동화와 Make</h1></a>
+          <h2 class="subtitle">해답</h2>
+          <h2 id="수업-02-makefiles">수업 02-makefiles</h2>
+<section class="challenge panel panel-success">
+<div class="panel-heading">
+<h2 id="신규-규칙-두개-작성하기"><span class="glyphicon glyphicon-pencil"></span>신규 규칙 두개 작성하기</h2>
+</div>
+<div class="panel-body">
+<p><code>last.dat</code> 파일에 대한 새로운 규칙을 작성하는데, <code>books/last.txt</code> 파일에서 생성된다.</p>
+<p><code>dats</code> 규칙을 상기 대상을 포함하도록 갱신하라.</p>
+<p><code>analysis.tar.gz</code> 에 대한 새로운 규칙을 작성하는데, 데이터 파일을 보관하도록 압축파일이 생성된다. 규칙은 다음 작업이 필요하다:</p>
+<ul>
+<li>세가지 <code>.dat</code> 파일 각각에 의존성을 갖는다.</li>
+<li><code>tar -czf analysis.tar.gz isles.dat abyss.dat last.dat</code> 동작을 호출한다.</li>
+</ul>
+<p><code>analysis.tar.gz</code> 파일을 제거하도록 <code>clean</code>을 갱신한다.</p>
+</div>
+</section>
+<div class="sourceCode"><pre class="sourceCode bash"><code class="sourceCode bash"><span class="co"># Count words.</span>
+<span class="kw">.PHONY</span> : dats
+<span class="kw">dats</span> : isles.dat abyss.dat last.dat
+
+<span class="kw">isles.dat</span> : books/isles.txt
+        <span class="kw">python</span> wordcount.py books/isles.txt isles.dat
+
+<span class="kw">abyss.dat</span> : books/abyss.txt
+        <span class="kw">python</span> wordcount.py books/abyss.txt abyss.dat
+
+<span class="kw">last.dat</span>: books/last.txt
+        <span class="kw">python</span> wordcount.py books/last.txt last.dat
+
+<span class="kw">analysis.tar.gz</span>: isles.dat abyss.dat last.dat
+        <span class="kw">tar</span> -czf analysis.tar.gz isles.dat abyss.dat last.dat
+
+<span class="kw">.PHONY</span> : clean
+<span class="kw">clean</span> :
+        <span class="kw">rm</span> -f *.dat
+        <span class="kw">rm</span> -f analysis.tar.gz</code></pre></div>
+<h2 id="lesson-03-variables">Lesson 03-variables</h2>
+<section class="challenge panel panel-success">
+<div class="panel-heading">
+<h2 id="update-dependencies"><span class="glyphicon glyphicon-pencil"></span>Update dependencies</h2>
+</div>
+<div class="panel-body">
+<p>What will happen if you now execute:</p>
+<div class="sourceCode"><pre class="sourceCode bash"><code class="sourceCode bash">$ <span class="kw">touch</span> *.dat
+$ <span class="kw">make</span> analysis.tar.gz</code></pre></div>
+<ol style="list-style-type: decimal">
+<li>nothing</li>
+<li>all files recreated</li>
+<li>only .dat files recreated</li>
+<li>only analysis.tar.gz recreated</li>
+</ol>
+</div>
+</section>
+<hr />
+<p>4.) only <code>analysis.tar.gz</code> recreated.</p>
+<p>You can check that <code>*.dat</code> is being expanded in the target of the rule for <code>analysis.tar.gz</code> by echoing the value of the automatic variable <code>$^</code> (all dependencies of the current rule).</p>
+<div class="sourceCode"><pre class="sourceCode bash"><code class="sourceCode bash"><span class="kw">analysis.tar.gz</span>: *.dat
+    <span class="kw">@echo</span> $^
+    <span class="kw">tar</span> -czf <span class="ot">$@</span> $^</code></pre></div>
+<p>The rules for <code>*.dat</code> are not executed because their corresponding <code>.txt</code> files haven’t been modified.</p>
+<p>If you run:</p>
+<div class="sourceCode"><pre class="sourceCode bash"><code class="sourceCode bash">    $ <span class="kw">touch</span> *.dat
+    $ <span class="kw">touch</span> books/*.txt
+    $ <span class="kw">make</span> analysis.tar.gz</code></pre></div>
+<p>You will find that the <code>.dat</code> files as well as <code>analysis.tar.gz</code> are recreated.</p>
+<hr />
+<section class="challenge panel panel-success">
+<div class="panel-heading">
+<h2 id="rewrite-.dat-rules-to-use-automatic-variables"><span class="glyphicon glyphicon-pencil"></span>Rewrite <code>.dat</code> rules to use automatic variables</h2>
+</div>
+<div class="panel-body">
+<p>Rewrite each <code>.dat</code> rule to use the automatic variables <code>$@</code> (‘the target of the current rule’) and <code>$&lt;</code> (‘the first dependency of the current rule’).</p>
+</div>
+</section>
+<div class="sourceCode"><pre class="sourceCode bash"><code class="sourceCode bash"><span class="co"># Count words.</span>
+<span class="kw">.PHONY</span> : dats
+<span class="kw">dats</span> : isles.dat abyss.dat last.dat
+
+<span class="kw">isles.dat</span> : books/isles.txt
+        <span class="kw">python</span> wordcount.py $<span class="kw">&lt;</span> <span class="ot">$@</span>
+
+<span class="kw">abyss.dat</span> : books/abyss.txt
+        <span class="kw">python</span> wordcount.py $<span class="kw">&lt;</span> <span class="ot">$@</span>
+
+<span class="kw">last.dat</span>: books/last.txt
+        <span class="kw">python</span> wordcount.py $<span class="kw">&lt;</span> <span class="ot">$@</span>
+
+<span class="kw">analysis.tar.gz</span>: *.dat
+        <span class="kw">tar</span> -czf <span class="ot">$@</span> $^
+
+<span class="kw">.PHONY</span> : clean
+<span class="kw">clean</span> :
+        <span class="kw">rm</span> -f *.dat
+        <span class="kw">rm</span> -f analysis.tar.gz</code></pre></div>
+<h2 id="lesson-06-variables">Lesson 06-variables</h2>
+<section class="challenge panel panel-success">
+<div class="panel-heading">
+<h2 id="use-variables"><span class="glyphicon glyphicon-pencil"></span>Use variables</h2>
+</div>
+<div class="panel-body">
+<p>Update <code>Makefile</code> so that the <code>%.dat</code> and <code>analysis.tar.gz</code> rules reference the variables <code>COUNT_SRC</code> and <code>COUNT_EXE</code>.</p>
+</div>
+</section>
+<div class="sourceCode"><pre class="sourceCode bash"><code class="sourceCode bash"><span class="co"># Count words.</span>
+<span class="ot">COUNT_SRC=</span>wordcount.py
+<span class="ot">COUNT_EXE=</span>python <span class="ot">$(</span><span class="kw">COUNT_SRC</span><span class="ot">)</span>
+
+<span class="kw">.PHONY</span> : dats
+<span class="kw">dats</span> : isles.dat abyss.dat last.dat
+
+<span class="kw">%.dat</span> : books/%.txt COUNT_SRC
+    <span class="ot">$(</span><span class="kw">COUNT_EXE</span><span class="ot">)</span> $<span class="kw">&lt;</span> <span class="ot">$*</span><span class="kw">.dat</span>
+
+<span class="co"># Generate archive file.</span>
+<span class="kw">analysis.tar.gz</span> : *.dat COUNT_SRC
+    <span class="kw">tar</span> -czf <span class="ot">$@</span> $^
+
+<span class="kw">.PHONY</span> : clean
+<span class="kw">clean</span> :
+        <span class="kw">rm</span> -f *.dat
+        <span class="kw">rm</span> -f analysis.tar.gz</code></pre></div>
+<h2 id="lesson-08-variables">Lesson 08-variables</h2>
+<section class="challenge panel panel-success">
+<div class="panel-heading">
+<h2 id="extend-the-makefile-to-create-jpegs"><span class="glyphicon glyphicon-pencil"></span>Extend the Makefile to create JPEGs</h2>
+</div>
+<div class="panel-body">
+<p>Add new rules, update existing rules, and add new macros to:</p>
+<ul>
+<li>Create <code>.jpg</code> files from <code>.dat</code> files using <code>plotcount.py</code>.</li>
+<li>Add the script and <code>.jpg</code> files to the archive.</li>
+<li>Remove all auto-generated files (<code>.dat</code>, <code>.jpg</code>, <code>analysis.tar.gz</code>).</li>
+</ul>
+</div>
+</section>
+<div class="sourceCode"><pre class="sourceCode bash"><code class="sourceCode bash"> <span class="co"># config.mk</span>
+ <span class="co"># Count words script.</span>
+<span class="ot">COUNT_SRC=</span>wordcount.py
+<span class="ot">COUNT_EXE=</span>python <span class="ot">$(</span><span class="kw">COUNT_SRC</span><span class="ot">)</span>
+
+<span class="co"># Plot word counts script.</span>
+<span class="ot">PLOT_SRC=</span>plotcount.py
+<span class="ot">PLOT_EXE=</span>python <span class="ot">$(</span><span class="kw">PLOT_SRC</span><span class="ot">)</span></code></pre></div>
+<div class="sourceCode"><pre class="sourceCode bash"><code class="sourceCode bash"><span class="co"># Makefile</span>
+<span class="kw">include</span> config.mk
+
+<span class="ot">TXT_FILES=$(</span><span class="kw">wildcard</span> books/*.txt<span class="ot">)</span>
+<span class="ot">DAT_FILES=$(</span><span class="kw">patsubst</span> books/%.txt, %.dat, <span class="ot">$(</span><span class="kw">TXT_FILES</span><span class="ot">))</span>
+<span class="ot">JPG_FILES=$(</span><span class="kw">patsubst</span> books/%.txt, %.jpg, <span class="ot">$(</span><span class="kw">TXT_FILES</span><span class="ot">))</span>
+
+<span class="co"># Count words.</span>
+<span class="kw">%.dat</span> : books/%.txt <span class="ot">$(</span><span class="kw">COUNT_SRC</span><span class="ot">)</span>
+    <span class="ot">$(</span><span class="kw">COUNT_EXE</span><span class="ot">)</span> $<span class="kw">&lt;</span> <span class="ot">$*</span><span class="kw">.dat</span>
+
+<span class="co"># Plot word counts.</span>
+<span class="kw">%.jpg</span> : %.dat <span class="ot">$(</span><span class="kw">PLOT_SRC</span><span class="ot">)</span>
+    <span class="ot">$(</span><span class="kw">PLOT_EXE</span><span class="ot">)</span> <span class="ot">$*</span><span class="kw">.dat</span> <span class="ot">$*</span>.jpg
+
+<span class="kw">.PHONY</span> : clean
+<span class="kw">clean</span> :
+    <span class="kw">rm</span> -f <span class="ot">$(</span><span class="kw">DAT_FILES</span><span class="ot">)</span>
+    <span class="kw">rm</span> -f <span class="ot">$(</span><span class="kw">JPG_FILES</span><span class="ot">)</span>
+    <span class="kw">rm</span> -f analysis.tar.gz
+
+<span class="kw">.PHONY</span> : dats
+<span class="kw">dats</span> : <span class="ot">$(</span><span class="kw">DAT_FILES</span><span class="ot">)</span>
+
+<span class="kw">.PHONY</span> : jpgs
+<span class="kw">jpgs</span> : <span class="ot">$(</span><span class="kw">JPG_FILES</span><span class="ot">)</span>
+
+<span class="kw">analysis.tar.gz</span> : <span class="ot">$(</span><span class="kw">DAT_FILES</span><span class="ot">)</span> <span class="ot">$(</span><span class="kw">JPG_FILES</span><span class="ot">)</span> <span class="ot">$(</span><span class="kw">COUNT_SRC</span><span class="ot">)</span> <span class="ot">$(</span><span class="kw">PLOT_SRC</span><span class="ot">)</span>
+    <span class="kw">tar</span> -czf <span class="ot">$@</span> $^
+
+<span class="kw">.PHONY</span> : variables
+<span class="kw">variables</span>:
+    <span class="kw">@echo</span> TXT_FILES: <span class="ot">$(</span><span class="kw">TXT_FILES</span><span class="ot">)</span>
+    <span class="kw">@echo</span> DAT_FILES: <span class="ot">$(</span><span class="kw">DAT_FILES</span><span class="ot">)</span>
+    <span class="kw">@echo</span> JPG_FILES: <span class="ot">$(</span><span class="kw">JPG_FILES</span><span class="ot">)</span></code></pre></div>
+        </div>
+      </div>
+      </article>
+      <div class="footer">
+        <a class="label swc-blue-bg" href="http://software-carpentry.org">Software Carpentry</a>
+        <a class="label swc-blue-bg" href="https://github.com/swcarpentry/lesson-template">Source</a>
+        <a class="label swc-blue-bg" href="mailto:admin@software-carpentry.org">Contact</a>
+        <a class="label swc-blue-bg" href="LICENSE.html">License</a>
+      </div>
+    </div>
+    <!-- Javascript placed at the end of the document so the pages load faster -->
+    <script src="http://software-carpentry.org/v5/js/jquery-1.9.1.min.js"></script>
+    <script src="css/bootstrap/bootstrap-js/bootstrap.js"></script>
+  </body>
+</html>

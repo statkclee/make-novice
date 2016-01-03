@@ -1,0 +1,193 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8">
+    <meta name="generator" content="pandoc">
+    <title>Software Carpentry: 자동화와 Make</title>
+    <link rel="shortcut icon" type="image/x-icon" href="/favicon.ico" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link rel="stylesheet" type="text/css" href="css/bootstrap/bootstrap.css" />
+    <link rel="stylesheet" type="text/css" href="css/bootstrap/bootstrap-theme.css" />
+    <link rel="stylesheet" type="text/css" href="css/swc.css" />
+    <link rel="alternate" type="application/rss+xml" title="Software Carpentry Blog" href="http://software-carpentry.org/feed.xml"/>
+    <meta charset="UTF-8" />
+    <!-- HTML5 shim, for IE6-8 support of HTML5 elements -->
+    <!--[if lt IE 9]>
+      <script src="http://html5shim.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
+  </head>
+  <body class="lesson">
+    <div class="container card">
+      <div class="banner">
+        <a href="http://software-carpentry.org" title="Software Carpentry">
+          <img alt="Software Carpentry banner" src="img/software-carpentry-banner.png" />
+        </a>
+      </div>
+      <article>
+      <div class="row">
+        <div class="col-md-10 col-md-offset-1">
+                    <a href="index.html"><h1 class="title">자동화와 Make</h1></a>
+          <h2 class="subtitle">Makefiles</h2>
+          <section class="objectives panel panel-warning">
+<div class="panel-heading">
+<h2 id="학습-목표"><span class="glyphicon glyphicon-certificate"></span>학습 목표</h2>
+</div>
+<div class="panel-body">
+<ul>
+<li>Makefile, 규칙(rule), 대상(target), 의존성, 동작(action)에 대한 주요 부분을 인식한다.</li>
+<li>간단한 Makefile을 작성한다.</li>
+<li>쉘에서 Make를 실행한다.</li>
+<li>대상을 <code>.PHONY</code>로 왜 그리고 언제 표식하는지 설명한다.</li>
+<li>의존성에 대한 제약을 설명한다.</li>
+</ul>
+</div>
+</section>
+<p>다음 내용을 갖는 <code>Makefile</code>로 불리는 파일을 생성한다:</p>
+<pre class="make"><code># 단어 갯수를 센다.
+isles.dat : books/isles.txt
+        python wordcount.py books/isles.txt isles.dat</code></pre>
+<p>간단한 <a href="reference.html#build-file">빌드 파일</a>(build file)로, Make를 사용할 때 <a href="reference.html#makefile">Makefile</a>로 불리우며 - Make가 실행하는 파일이다. 순차적으로 각 라인을 찬찬히 살펴보자:</p>
+<ul>
+<li><code>#</code> 은 <em>주석</em>을 나타낸다. <code>#</code> 시작되는 어떤 텍스트나 끝 줄까지 Make가 무시한다.</li>
+<li><code>isles.dat</code> 는 <a href="reference.html#target">대상</a>(target)으로, 생성되거나 빌드되는 파일이다.</li>
+<li><code>books/isles.txt</code> 파일은 <a href="reference.html#dependency">의존성</a>(dependency)으로, 대상을 빌드하거나 갱신하는데 필요한 파일이 된다. 대상은 의존성을 0 혹은 여러개 갖을 수 있다.</li>
+<li><code>:</code> 은 구분자로 대상과 의존성을 구별한다.</li>
+<li><code>python wordcount.py books/isles.txt isles.dat</code> 은 <a href="reference.html#action">동작</a>(action)으로, 의존성을 사용해서 대상을 빌드하거나 갱신하는데 실행되는 명령어가 된다. 대상은 의존성을 0 혹은 여러개 갖을 수 있다.</li>
+<li>동작은 공백 8자가 <em>아니라,</em> 탭(TAB) 문자를 사용해서 들여쓰기 한다. 1970년부터 사용된 Make 유산이다.</li>
+<li>대상, 의존성, 동작이 모여 <a href="reference.html#rule">규칙</a>(rule)을 구성하게 된다.</li>
+</ul>
+<p>상기 규칙은 <code>python wordcount.py</code> 동작과 <code>books/isles.txt</code> 의존성을 사용해서 <code>isles.dat</code> 대상을 빌드하는 방식을 기술하고 있다.</p>
+<p>아무것도 없는 처음 상태에서 시작하도록, 생성했던 <code>.dat</code> 와 <code>.jpg</code> 확장자를 갖는 파일을 삭제한다:</p>
+<div class="sourceCode"><pre class="sourceCode bash"><code class="sourceCode bash">$ <span class="kw">rm</span> *.dat *.jpg</code></pre></div>
+<p>기본 디폴트 설정으로, Make는 <code>Makefile</code>로 불리는 Makefile을 찾는다. 그리고, Make를 다음과 같이 실행한다.</p>
+<div class="sourceCode"><pre class="sourceCode bash"><code class="sourceCode bash">$ <span class="kw">make</span></code></pre></div>
+<p>Make는 실행하는 동작을 화면에 출력한다:</p>
+<pre class="output"><code>python wordcount.py books/isles.txt isles.dat</code></pre>
+<p>만약 다음 메시지를 보게 되면,</p>
+<pre class="error"><code>Makefile:3: *** missing separator.  Stop.</code></pre>
+<p>동작 중 하나를 들여쓰는데 탭 문자 대신에 공백을 사용했기 때문이다.</p>
+<p>Makefile을 <code>Makefile</code>로 호명할 필요는 없다. 하지만, 그밖의 다른 것으로 호명하려면, Make가 어디서 찾을 수 있는지 일러줄 필요가 있다. <code>-f</code> 플래그를 사용해서 파일명을 지정할 수 있다. 예를 들어:</p>
+<div class="sourceCode"><pre class="sourceCode bash"><code class="sourceCode bash">$ <span class="kw">make</span> -f Makefile</code></pre></div>
+<p>Makefile을 재실하면, Make가 다음과 같이 정보를 준다:</p>
+<pre class="output"><code>make: `isles.dat&#39; is up to date.</code></pre>
+<p>상기와 같이 출력되는 이유는 대상 <code>isles.dat</code> 파일이 이제 생성되어서, Make가 다시 생성하기 않기 때문이다. 작동 방식을 살펴보기 위해서, 텍스트 파일 중 하나를 갱신한 척 해보자. 편집기에서 파일을 여는 대신에, 쉘 <code>touch</code> 명령어를 사용해서 시간도장(timestamp)을 갱신한다. 시간도장 갱신은 파일을 편집하면 발생되게 된다:</p>
+<div class="sourceCode"><pre class="sourceCode bash"><code class="sourceCode bash">$ <span class="kw">touch</span> books/isles.txt</code></pre></div>
+<p><code>books/isles.txt</code> 파일과 <code>isles.dat</code> 파일 시간도장을 비교하면,</p>
+<div class="sourceCode"><pre class="sourceCode bash"><code class="sourceCode bash">$ <span class="kw">ls</span> -l books/isles.txt isles.dat</code></pre></div>
+<p>대상 <code>isles.dat</code> 파일이 의존성 <code>books/isles.txt</code> 파일보다 더 이전 파일임을 알게 된다:</p>
+<pre class="output"><code>-rw-r--r--    1 mjj      Administ   323972 Jun 12 10:35 books/isles.txt
+-rw-r--r--    1 mjj      Administ   182273 Jun 12 09:58 isles.dat</code></pre>
+<p>Make를 다시 실행하면,</p>
+<div class="sourceCode"><pre class="sourceCode bash"><code class="sourceCode bash">$ <span class="kw">make</span></code></pre></div>
+<p><code>isles.dat</code> 파일을 다시 생성시킨다:</p>
+<pre class="output"><code>python wordcount.py books/isles.txt isles.dat</code></pre>
+<p>대상을 빌드하도록 Make가 요청받을 때, Make는 대상과 의존성 모두의 ’최종 변경 시간’을 검사한다. 만약 대상과 비교해서 의존성에 갱신된 것이 있다면, 대상을 갱신하도록 동작을 다시 실행한다.</p>
+<p><code>Makefile</code> 파일 후미에 또다른 규칙을 추가하자:</p>
+<pre class="make"><code>abyss.dat : books/abyss.txt
+        python wordcount.py books/abyss.txt abyss.dat</code></pre>
+<p>Make를 실행하면,</p>
+<div class="sourceCode"><pre class="sourceCode bash"><code class="sourceCode bash">$ <span class="kw">make</span></code></pre></div>
+<p>다음 결과를 얻게 된다:</p>
+<pre class="output"><code>make: `isles.dat&#39; is up to date.</code></pre>
+<p>아무일도 발생하지 않는데, 이유는 Make가 <code>Makefile</code>에서 찾게되는 첫번째 대상만 빌드하려고 하기 때문이다. 첫번째 대상이 <a href="reference.html#default-target">기본 디폴트 설정 대상</a>(default target)으로 <code>isles.dat</code> 파일이 되는데 이미 최신 상태다. 명시적으로 Make에게 <code>abyss.dat</code> 파일을 빌드한다는 의도를 일러줄 필요가 있다:</p>
+<div class="sourceCode"><pre class="sourceCode bash"><code class="sourceCode bash">$ <span class="kw">make</span> abyss.dat</code></pre></div>
+<p>이제 다음 결과를 얻게 된다:</p>
+<pre class="output"><code>python wordcount.py books/abyss.txt abyss.dat</code></pre>
+<p>작업한 모든 파일을 제거하고 나서 명시적으로 전부 재생성할 수 있다. 이 작업으로 새로운 대상과 연관된 규칙 <code>clean</code>을 도입한다:</p>
+<pre class="make"><code>clean : 
+        rm -f *.dat</code></pre>
+<p>상기 규칙예제가 의존성을 갖지 않는 사례다. <code>clean</code>은 어떤 <code>.dat</code> 파일에 대해서도 의존성이 없다. 왜냐하면, 금방 삭제될 파일을 다시 생성하는 것이 무의미하기 때문이다. 파일이 존재하든 존재하지 않던 데이터 파일을 제거하고자 한다. 대상을 명세하고 Make를 실행하면,</p>
+<div class="sourceCode"><pre class="sourceCode bash"><code class="sourceCode bash">$ <span class="kw">make</span> clean</code></pre></div>
+<p>다음 결과를 얻게 된다:</p>
+<pre class="output"><code>rm -f *.dat</code></pre>
+<p><code>clean</code>으로 불리는 실제로 어떤 것도 빌드되지는 않는다. 오히려, 유용한 연속 동작을 실행하는데 사용하는 약칭이 된다. 매우 유용하지만, 이런 대상이 문제를 불러 일으킬 수 있다. 예를 들어, 데이터 파일을 다시 생성하고, <code>clean</code> 이라는 디렉토리를 생성하고 나서, Make를 실행한다:</p>
+<div class="sourceCode"><pre class="sourceCode bash"><code class="sourceCode bash">$ <span class="kw">make</span> isles.dat abyss.dat
+$ <span class="kw">mkdir</span> clean
+$ <span class="kw">make</span> clean</code></pre></div>
+<p>다음 결과를 얻게 된다:</p>
+<pre class="outputs"><code>make: `clean&#39; is up to date.</code></pre>
+<p>Make가 <code>clean</code>이라는 파일(혹은 디렉토리)을 찾는다. <code>clean</code> 규칙에는 어떤 의존성도 없기 때문에, <code>clean</code> 이 빌드되어서 최신 상태라고 가정하게 된다. 그래서, 규칙에 나온 동작을 하나도 실행하지 않는다. <code>clean</code>을 약칭으로 사용할 때, <code>make clean</code> 명령어를 실행하면, 항상 해당 규칙을 Make가 실행하도록 일러줄 필요가 있다. Make에게 어떤 것도 빌드하지 않는 <a href="#reference.html#phony-target">가짜 대상</a>(phony target)이라고 일러줘서 이 문제를 해결한다. 대상을 <code>.PHONY</code>로 표식해서 해당 작업을 수행한다:</p>
+<pre class="make"><code>.PHONY : clean
+clean : 
+        rm -f *.dat</code></pre>
+<p>Make를 실행하면,</p>
+<div class="sourceCode"><pre class="sourceCode bash"><code class="sourceCode bash">$ <span class="kw">make</span> clean</code></pre></div>
+<p>다음 결과를 얻는다:</p>
+<pre class="outputs"><code>rm -f *.dat</code></pre>
+<p>모든 데이터 파일을 생성하도록 유사한 명령어를 추가할 수도 있다:</p>
+<pre class="make"><code>.PHONY : dats
+dats : isles.dat abyss.dat</code></pre>
+<p>상기 규칙예제가 다른 규칙에 대상이 되는 의존성을 갖는 규칙이다. Make를 실행하면, 의존성이 존재하는지 검사하고, 만약 의존성이 없다면, 해당 파일을 생성하는 규칙이 있는지를 살펴본다. 만약 그런 규칙이 존재하면, 먼저 동작시키게 되고, 그렇지 않다면 Make가 오류를 발생시킨다.</p>
+<aside class="callout panel panel-info">
+<div class="panel-heading">
+<h2 id="의존성dependencies"><span class="glyphicon glyphicon-pushpin"></span>의존성(Dependencies)</h2>
+</div>
+<div class="panel-body">
+<p>의존성을 다시 빌드하는 순서는 무작위다. 목록에 기입된 순서로 빌드된다고 가정하지 말아야 된다.</p>
+<p>의존성은 방향성 있는 주기가 없는 그래프(directed acyclic graph) 형태를 띈다. 대상이 본인 혹은 의존성을 갖는 하나가 대상에 의존성을 갖을 수 없다.</p>
+</div>
+</aside>
+<p>동작을 갖지 않는 규칙의 한 사례이기도 하다. 필요한 경우, 순전히 의존성 빌드를 촉발하는데 사용되기도 하다.</p>
+<p>만약 상기 규칙을 실행하면,</p>
+<div class="sourceCode"><pre class="sourceCode bash"><code class="sourceCode bash">$ <span class="kw">make</span> dats</code></pre></div>
+<p>Make가 data 파일을 생성하게 된다:</p>
+<pre class="output"><code>python wordcount.py books/isles.txt isles.dat
+python wordcount.py books/abyss.txt abyss.dat</code></pre>
+<p><code>dats</code>를 다시 실행하면,</p>
+<div class="sourceCode"><pre class="sourceCode bash"><code class="sourceCode bash">$ <span class="kw">make</span> dats</code></pre></div>
+<p>Make가 데이터 파일이 존재하는 것을 알게 된다:</p>
+<pre class="output"><code>make: Nothing to be done for `dats&#39;.</code></pre>
+<p>이제 최종 Makefile은 다음과 같다:</p>
+<pre class="make"><code># Count words.
+.PHONY : dats
+dats : isles.dat abyss.dat
+
+isles.dat : books/isles.txt
+        python wordcount.py books/isles.txt isles.dat
+
+abyss.dat : books/abyss.txt
+        python wordcount.py books/abyss.txt abyss.dat
+
+.PHONY : clean
+clean :
+        rm -f *.dat</code></pre>
+<p><code>dats</code>에 명기된 대상을 빌드하는데 관여된 의존성을 도식화했는데, Makefile에서 구현된 사항이 다음 그림에 나와 있다:</p>
+<div class="figure">
+<img src="img/02-makefile.png" title="Dependencies represented within the Makefile" alt="Makefile 내부에 표현된 의존성" />
+<p class="caption">Makefile 내부에 표현된 의존성</p>
+</div>
+<section class="challenge panel panel-success">
+<div class="panel-heading">
+<h2 id="신규-규칙-두개-작성하기"><span class="glyphicon glyphicon-pencil"></span>신규 규칙 두개 작성하기</h2>
+</div>
+<div class="panel-body">
+<p><code>last.dat</code> 파일에 대한 새로운 규칙을 작성하는데, <code>books/last.txt</code> 파일에서 생성된다.</p>
+<p><code>dats</code> 규칙을 상기 대상을 포함하도록 갱신하라.</p>
+<p><code>analysis.tar.gz</code> 에 대한 새로운 규칙을 작성하는데, 데이터 파일을 보관하도록 압축파일이 생성된다. 규칙은 다음 작업이 필요하다:</p>
+<ul>
+<li>세가지 <code>.dat</code> 파일 각각에 의존성을 갖는다.</li>
+<li><code>tar -czf analysis.tar.gz isles.dat abyss.dat last.dat</code> 동작을 호출한다.</li>
+</ul>
+<p><code>analysis.tar.gz</code> 파일을 제거하도록 <code>clean</code>을 갱신한다.</p>
+</div>
+</section>
+<p><code>analysis.tar.gz</code>에 명기된 대상을 빌드하는데 관여된 의존성을 도식화했는데, Makefile에서 구현된 사항이 다음 그림에 나와 있다:</p>
+<div class="figure">
+<img src="img/02-makefile-challenge.png" title="analysis.tar.gz dependencies represented within the Makefile" alt="Makefile 내부에 표현된 analysis.tar.gz 의존성" />
+<p class="caption">Makefile 내부에 표현된 analysis.tar.gz 의존성</p>
+</div>
+        </div>
+      </div>
+      </article>
+      <div class="footer">
+        <a class="label swc-blue-bg" href="http://software-carpentry.org">Software Carpentry</a>
+        <a class="label swc-blue-bg" href="https://github.com/swcarpentry/lesson-template">Source</a>
+        <a class="label swc-blue-bg" href="mailto:admin@software-carpentry.org">Contact</a>
+        <a class="label swc-blue-bg" href="LICENSE.html">License</a>
+      </div>
+    </div>
+    <!-- Javascript placed at the end of the document so the pages load faster -->
+    <script src="http://software-carpentry.org/v5/js/jquery-1.9.1.min.js"></script>
+    <script src="css/bootstrap/bootstrap-js/bootstrap.js"></script>
+  </body>
+</html>
