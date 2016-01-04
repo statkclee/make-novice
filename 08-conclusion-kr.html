@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8">
+    <meta name="generator" content="pandoc">
+    <title>Software Carpentry: 자동화와 Make</title>
+    <link rel="shortcut icon" type="image/x-icon" href="/favicon.ico" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link rel="stylesheet" type="text/css" href="css/bootstrap/bootstrap.css" />
+    <link rel="stylesheet" type="text/css" href="css/bootstrap/bootstrap-theme.css" />
+    <link rel="stylesheet" type="text/css" href="css/swc.css" />
+    <link rel="alternate" type="application/rss+xml" title="Software Carpentry Blog" href="http://software-carpentry.org/feed.xml"/>
+    <meta charset="UTF-8" />
+    <!-- HTML5 shim, for IE6-8 support of HTML5 elements -->
+    <!--[if lt IE 9]>
+      <script src="http://html5shim.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
+  </head>
+  <body class="lesson">
+    <div class="container card">
+      <div class="banner">
+        <a href="http://software-carpentry.org" title="Software Carpentry">
+          <img alt="Software Carpentry banner" src="img/software-carpentry-banner.png" />
+        </a>
+      </div>
+      <article>
+      <div class="row">
+        <div class="col-md-10 col-md-offset-1">
+                    <a href="index.html"><h1 class="title">자동화와 Make</h1></a>
+          <h2 class="subtitle">결론</h2>
+          <section class="objectives panel panel-warning">
+<div class="panel-heading">
+<h2 id="학습-목표"><span class="glyphicon glyphicon-certificate"></span>학습 목표</h2>
+</div>
+<div class="panel-body">
+<ul>
+<li>Make 같은 자동 빌드 도구의 장점.</li>
+</ul>
+</div>
+</section>
+<p>Make 같은 자동 빌드 도구는 여러가지 방식으로 도움을 줄 수 있다. 반복되는 명령어를 자동화해서, 명령어를 수작업으로 실행할 때, 범하게 되는 오류위험을 줄여 주고, 시간을 절약해서 도움이 된다.</p>
+<p>생성할 파일이 어떤 방식으로 변경될 때, 자동적으로 생성되는 산출물(데이터 파일 혹은 그래프)만 다시 생성하게 함으로써 시간을 절약해준다.</p>
+<p>대상, 의존성, 동작 개념을 통해, 코드, 스크립트, 도구, 구성(configuration), 원데이터, 파생된 데이터, 그래프, 논문 사이 의존성을 기록하는 문서화 형태로 역할을 수행한다.</p>
+<section class="challenge panel panel-success">
+<div class="panel-heading">
+<h2 id="makefile을-연장해서-jpeg-생성하기"><span class="glyphicon glyphicon-pencil"></span>Makefile을 연장해서 JPEG 생성하기</h2>
+</div>
+<div class="panel-body">
+<p>새로운 규칙을 추가하고, 기존 규칙을 갱신하고, 매크로를 새로 추가하여 다음 작업을 수행한다:</p>
+<ul>
+<li><code>plotcount.py</code> 프로그램을 사용해서 <code>.dat</code> 파일에서 <code>.jpg</code> 파일을 생성한다.</li>
+<li>스크립트와 <code>.jpg</code> 파일을 문서보관 아카이브에 추가한다.</li>
+<li>자동생성된 모든 파일(<code>.dat</code>, <code>.jpg</code>, <code>analysis.tar.gz</code>)을 제거한다.</li>
+</ul>
+</div>
+</section>
+<p>이미지에 대한 기능을 추가한 후, <code>analysis.tar.gz</code>에 명기된 대상을 빌드하는데 관여된 의존성을 도식화했는데, Makefile에서 구현된 사항이 다음 그림에 나와 있다:</p>
+<div class="figure">
+<img src="img/08-conclusion-challenge.png" title="analysis.tar.gz dependencies once images have been added" alt="이미지가 추가된 후 analysis.tar.gz 의존성" />
+<p class="caption">이미지가 추가된 후 analysis.tar.gz 의존성</p>
+</div>
+        </div>
+      </div>
+      </article>
+      <div class="footer">
+        <a class="label swc-blue-bg" href="http://software-carpentry.org">Software Carpentry</a>
+        <a class="label swc-blue-bg" href="https://github.com/swcarpentry/lesson-template">Source</a>
+        <a class="label swc-blue-bg" href="mailto:admin@software-carpentry.org">Contact</a>
+        <a class="label swc-blue-bg" href="LICENSE.html">License</a>
+      </div>
+    </div>
+    <!-- Javascript placed at the end of the document so the pages load faster -->
+    <script src="http://software-carpentry.org/v5/js/jquery-1.9.1.min.js"></script>
+    <script src="css/bootstrap/bootstrap-js/bootstrap.js"></script>
+  </body>
+</html>
