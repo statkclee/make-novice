@@ -134,11 +134,11 @@ COUNT_EXE=python $(COUNT_SRC)
 .PHONY : dats
 dats : isles.dat abyss.dat last.dat
 
-%.dat : books/%.txt COUNT_SRC
+%.dat : books/%.txt $(COUNT_SRC)
     $(COUNT_EXE) $< $*.dat
 
 # Generate archive file.
-analysis.tar.gz : *.dat COUNT_SRC
+analysis.tar.gz : *.dat $(COUNT_SRC)
     tar -czf $@ $^
 
 .PHONY : clean
