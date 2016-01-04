@@ -1,0 +1,171 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8">
+    <meta name="generator" content="pandoc">
+    <title>Software Carpentry: 자동화와 Make</title>
+    <link rel="shortcut icon" type="image/x-icon" href="/favicon.ico" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link rel="stylesheet" type="text/css" href="css/bootstrap/bootstrap.css" />
+    <link rel="stylesheet" type="text/css" href="css/bootstrap/bootstrap-theme.css" />
+    <link rel="stylesheet" type="text/css" href="css/swc.css" />
+    <link rel="alternate" type="application/rss+xml" title="Software Carpentry Blog" href="http://software-carpentry.org/feed.xml"/>
+    <meta charset="UTF-8" />
+    <!-- HTML5 shim, for IE6-8 support of HTML5 elements -->
+    <!--[if lt IE 9]>
+      <script src="http://html5shim.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
+  </head>
+  <body class="lesson">
+    <div class="container card">
+      <div class="banner">
+        <a href="http://software-carpentry.org" title="Software Carpentry">
+          <img alt="Software Carpentry banner" src="img/software-carpentry-banner.png" />
+        </a>
+      </div>
+      <article>
+      <div class="row">
+        <div class="col-md-10 col-md-offset-1">
+                    <a href="index.html"><h1 class="title">자동화와 Make</h1></a>
+          <h2 class="subtitle">함수</h2>
+          <section class="objectives panel panel-warning">
+<div class="panel-heading">
+<h2 id="학습-목표"><span class="glyphicon glyphicon-certificate"></span>학습 목표</h2>
+</div>
+<div class="panel-body">
+<ul>
+<li>Make <code>wildcard</code> 함수를 사용해서 패턴과 매칭되는 파일 목록을 얻어온다.</li>
+<li>Make <code>patsubst</code> 함수를 사용해서 파일명을 다시 작성한다.</li>
+</ul>
+</div>
+</section>
+<p>현재 시점엣, Makefile은 다음과 같다:</p>
+<pre class="make"><code>include config.mk
+
+# Count words.
+.PHONY : dats
+dats : isles.dat abyss.dat last.dat
+
+%.dat : books/%.txt $(COUNT_SRC)
+    $(COUNT_EXE) $&lt; $*.dat
+
+# Generate archive file.
+analysis.tar.gz : *.dat $(COUNT_SRC)
+    tar -czf $@ $^
+
+.PHONY : clean
+clean :
+        rm -f *.dat
+        rm -f analysis.tar.gz</code></pre>
+<p>Make에는 많은 <a href="reference.html#function">함수</a>(functions)가 지원되어 더 복잡한 규칙을 작성할 수 있다. 한 사례가 <code>wildcard</code>다. <code>wildcard</code>는 특정 패턴과 매칭되는 파일 목록을 얻어와서, 변수에 저장할 수 있다. 예를 들어, 모든 텍스트 파일(<code>.txt</code>로 끝나는 파일) 목록을 불러와서 Makefile 시작부분에 변수에 불러온 값을 저장한다:</p>
+<pre class="make"><code>TXT_FILES=$(wildcard books/*.txt)</code></pre>
+<p>변수의 값을 보여주도록 <code>.PHONY</code> 대상과 규칙으로 추가한다:</p>
+<pre class="make"><code>.PHONY : variables
+variables:
+    @echo TXT_FILES: $(TXT_FILES)</code></pre>
+<aside class="callout panel panel-info">
+<div class="panel-heading">
+<h2 id="echo"><span class="glyphicon glyphicon-pushpin"></span><span class="citation">@echo</span></h2>
+</div>
+<div class="panel-body">
+<p>Make는 동작을 실행할 때 동작을 화면에 출력한다. 동작 시작부에 <code>@</code>을 사용하면 Make로 하여금 동작을 출력하지 않게 한다. 그래서, <code>echo</code> 대신에 <code>@echo</code>을 사용함으로써, <code>echo</code> 실행 결과(변수값을 출력)를 볼 수 있지만, <code>echo</code> 명령어 자체는 볼 수 없게 된다.</p>
+</div>
+</aside>
+<p>Make를 실행하면:</p>
+<div class="sourceCode"><pre class="sourceCode bash"><code class="sourceCode bash">$ <span class="kw">make</span> variables</code></pre></div>
+<p>다음 결과를 얻게 된다:</p>
+<pre class="output"><code>TXT_FILES: books/abyss.txt books/isles.txt books/last.txt books/sierra.txt</code></pre>
+<p>이제 <code>sierra.txt</code>도 포함된 것에 주목한다.</p>
+<p>함수를 도입한 후, <code>analysis.tar.gz</code>에 명기된 대상을 빌드하는데 관여된 의존성을 도식화했는데, Makefile에서 구현된 사항이 다음 그림에 나와 있다:</p>
+<div class="figure">
+<img src="img/07-functions.png" title="analysis.tar.gz dependencies after introducing a function" alt="함수를 도입한 후에 analysis.tar.gz 의존성" />
+<p class="caption">함수를 도입한 후에 analysis.tar.gz 의존성</p>
+</div>
+<p><code>patsubst</code> (‘pattern substitution’, 패턴 치환)은 패턴, 대체 문자열, 명칭 목록을 순서대로 받는다; 목록에 나와 있는 패턴과 매칭되는 명칭은 대체 문자열로 치환된다. 다시, 결과는 변수에 저장한다. 예를 들어, 텍스트 파일 목록을 데이터 파일 목록(<code>.dat</code>로 끝나는 파일)으로 다시 작성하고 해당 결과를 변수에 저장한다:</p>
+<pre class="make"><code>DAT_FILES=$(patsubst books/%.txt, %.dat, $(TXT_FILES))</code></pre>
+<p><code>variables</code>을 연장해서 <code>DAT_FILES</code> 값을 보여준다:</p>
+<pre class="make"><code>.PHONY : variables
+variables:
+    @echo TXT_FILES: $(TXT_FILES)
+    @echo DAT_FILES: $(DAT_FILES)</code></pre>
+<p>Make를 실행하면,</p>
+<div class="sourceCode"><pre class="sourceCode bash"><code class="sourceCode bash">$ <span class="kw">make</span> variables</code></pre></div>
+<p>다음 결과를 얻게 된다:</p>
+<pre class="output"><code>TXT_FILES: books/abyss.txt books/isles.txt books/last.txt books/sierra.txt
+DAT_FILES: abyss.dat isles.dat last.dat sierra.dat</code></pre>
+<p>이제, <code>sierra.txt</code> 파일도 처리된다.</p>
+<p>이것을 갖고, <code>clean</code> 과 <code>dats</code> 파일을 다시 작성한다:</p>
+<pre class="make"><code>.PHONY : clean
+clean :
+        rm -f $(DAT_FILES)
+        rm -f analysis.tar.gz
+
+.PHONY : dats
+dats : $(DAT_FILES)</code></pre>
+<p>검사해 봅시다:</p>
+<div class="sourceCode"><pre class="sourceCode bash"><code class="sourceCode bash">$ <span class="kw">make</span> clean
+$ <span class="kw">make</span> dats</code></pre></div>
+<p>다음 결과를 얻게된다:</p>
+<pre class="output"><code>python wordcount.py books/abyss.txt abyss.dat
+python wordcount.py books/isles.txt isles.dat
+python wordcount.py books/last.txt last.dat
+python wordcount.py books/sierra.txt sierra.dat</code></pre>
+<p><code>analysis.tar.gz</code> 도 다시 작성할 수 있다:</p>
+<pre class="make"><code>analysis.tar.gz : $(DAT_FILES) $(COUNT_SRC)
+    tar -czf $@ $^</code></pre>
+<p>Make를 다시 실행하면:</p>
+<div class="sourceCode"><pre class="sourceCode bash"><code class="sourceCode bash">$ <span class="kw">make</span> clean
+$ <span class="kw">make</span> analysis.tar.gz</code></pre></div>
+<p>다음 결과를 얻게 된다:</p>
+<pre class="output"><code>$ make analysis.tar.gz
+python wordcount.py books/abyss.txt abyss.dat
+python wordcount.py books/isles.txt isles.dat
+python wordcount.py books/last.txt last.dat
+python wordcount.py books/sierra.txt sierra.dat
+tar -czf analysis.tar.gz abyss.dat isles.dat last.dat sierra.dat wordcount.py</code></pre>
+<p>배쉬 <code>*.dat</code> 와일드-카드를 사용할 때 가졌던 문제(<code>make analysis.tar.gz</code> 실행하기 전에 <code>make dats</code> 실행이 필요했던 것)가 이제 말끔히 사라진 것을 보게 된다. 왜냐하면, 함수가 <code>books/</code> 디렉토리에 있는 <code>.txt</code> 파일에 대해 <code>.dat</code> 파일을 생성하게 한다.</p>
+<p>다음에 최종 Makefile이 나와 있다:</p>
+<pre class="make"><code>include config.mk
+
+TXT_FILES=$(wildcard books/*.txt)
+DAT_FILES=$(patsubst books/%.txt, %.dat, $(TXT_FILES))
+
+.PHONY: variables
+variables:
+    @echo TXT_FILES: $(TXT_FILES)
+    @echo DAT_FILES: $(DAT_FILES)
+
+# Count words.
+.PHONY : dats
+dats : $(DAT_FILES)
+
+%.dat : books/%.txt $(COUNT_SRC)
+    $(COUNT_EXE) $&lt; $*.dat
+
+# Generate archive file.
+analysis.tar.gz : $(DAT_FILES) $(COUNT_SRC)
+    tar -czf $@ $^
+
+.PHONY : clean
+clean :
+    rm -f $(DAT_FILES)
+    rm -f analysis.tar.gz</code></pre>
+<p><code>config.mk</code> 파일에 다음이 포함되어 있음을 기억하라:</p>
+<pre class="make"><code># Count words script.
+COUNT_SRC=wordcount.py
+COUNT_EXE=python $(COUNT_SRC)</code></pre>
+        </div>
+      </div>
+      </article>
+      <div class="footer">
+        <a class="label swc-blue-bg" href="http://software-carpentry.org">Software Carpentry</a>
+        <a class="label swc-blue-bg" href="https://github.com/swcarpentry/lesson-template">Source</a>
+        <a class="label swc-blue-bg" href="mailto:admin@software-carpentry.org">Contact</a>
+        <a class="label swc-blue-bg" href="LICENSE.html">License</a>
+      </div>
+    </div>
+    <!-- Javascript placed at the end of the document so the pages load faster -->
+    <script src="http://software-carpentry.org/v5/js/jquery-1.9.1.min.js"></script>
+    <script src="css/bootstrap/bootstrap-js/bootstrap.js"></script>
+  </body>
+</html>

@@ -74,20 +74,15 @@ Makefile에서 구현된 사항이 다음 그림에 나와 있다:
 
 ![함수를 도입한 후에 analysis.tar.gz 의존성](img/07-functions.png "analysis.tar.gz dependencies after introducing a function")
 
-`patsubst` ('pattern substitution', 패턴 치환)은 
-
-`patsubst` ('pattern substitution') takes a pattern, a replacement string and a
-list of names in that order; each name in the list that matches the pattern is 
-replaced by the replacement string. Again, we can save the result in a
-variable. So, for example, we can rewrite our list of text files into
-a list of data files (files ending in `.dat`) and save these in a
-variable:
+`patsubst` ('pattern substitution', 패턴 치환)은 패턴, 대체 문자열, 명칭 목록을 순서대로 받는다;
+목록에 나와 있는 패턴과 매칭되는 명칭은 대체 문자열로 치환된다. 다시, 결과는 변수에 저장한다.
+예를 들어, 텍스트 파일 목록을 데이터 파일 목록(`.dat`로 끝나는 파일)으로 다시 작성하고 해당 결과를 변수에 저장한다:
 
 ~~~ {.make}
 DAT_FILES=$(patsubst books/%.txt, %.dat, $(TXT_FILES))
 ~~~
 
-We can extend `variables` to show the value of `DAT_FILES` too:
+`variables`을 연장해서 `DAT_FILES` 값을 보여준다:
 
 ~~~ {.make}
 .PHONY : variables
@@ -96,22 +91,22 @@ variables:
 	@echo DAT_FILES: $(DAT_FILES)
 ~~~
 
-If we run Make,
+Make를 실행하면,
 
 ~~~ {.bash}
 $ make variables
 ~~~
 
-then we get:
+다음 결과를 얻게 된다:
 
 ~~~ {.output}
 TXT_FILES: books/abyss.txt books/isles.txt books/last.txt books/sierra.txt
 DAT_FILES: abyss.dat isles.dat last.dat sierra.dat
 ~~~
 
-Now, `sierra.txt` is processed too.
+이제, `sierra.txt` 파일도 처리된다.
 
-With these we can rewrite `clean` and `dats`:
+이것을 갖고, `clean` 과 `dats` 파일을 다시 작성한다:
 
 ~~~ {.make}
 .PHONY : clean
@@ -123,14 +118,14 @@ clean :
 dats : $(DAT_FILES)
 ~~~
 
-Let's check:
+검사해 봅시다:
 
 ~~~ {.bash}
 $ make clean
 $ make dats
 ~~~
 
-We get:
+다음 결과를 얻게된다:
 
 ~~~ {.output}
 python wordcount.py books/abyss.txt abyss.dat
@@ -139,21 +134,21 @@ python wordcount.py books/last.txt last.dat
 python wordcount.py books/sierra.txt sierra.dat
 ~~~
 
-We can also rewrite `analysis.tar.gz` too:
+`analysis.tar.gz` 도 다시 작성할 수 있다:
 
 ~~~ {.make}
 analysis.tar.gz : $(DAT_FILES) $(COUNT_SRC)
 	tar -czf $@ $^
 ~~~
 
-If we re-run Make:
+Make를 다시 실행하면:
 
 ~~~ {.bash}
 $ make clean
 $ make analysis.tar.gz
 ~~~
 
-We get:
+다음 결과를 얻게 된다:
 
 ~~~ {.output}
 $ make analysis.tar.gz
@@ -164,12 +159,10 @@ python wordcount.py books/sierra.txt sierra.dat
 tar -czf analysis.tar.gz abyss.dat isles.dat last.dat sierra.dat wordcount.py
 ~~~
 
-We see that the problem we had when using the bash wild-card, `*.dat`,
-which required us to run `make dats` before `make analysis.tar.gz` has
-now disappeared, since our functions allow us to create `.dat` file
-names from those `.txt` file names in `books/`.
+배쉬 `*.dat` 와일드-카드를 사용할 때 가졌던 문제(`make analysis.tar.gz` 실행하기 전에 `make dats` 실행이 필요했던 것)가 이제 말끔히 사라진 것을 보게 된다. 왜냐하면, 
+함수가 `books/` 디렉토리에 있는 `.txt` 파일에 대해 `.dat` 파일을 생성하게 한다.
 
-Here is our final Makefile:
+다음에 최종 Makefile이 나와 있다:
 
 ~~~ {.make}
 include config.mk
@@ -199,7 +192,7 @@ clean :
 	rm -f analysis.tar.gz
 ~~~
 
-Remember, the `config.mk` file contains:
+`config.mk` 파일에 다음이 포함되어 있음을 기억하라:
 
 ~~~ {.make}
 # Count words script.
