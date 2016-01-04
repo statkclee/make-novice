@@ -1,0 +1,114 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8">
+    <meta name="generator" content="pandoc">
+    <title>Software Carpentry: 자동화와 Make</title>
+    <link rel="shortcut icon" type="image/x-icon" href="/favicon.ico" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link rel="stylesheet" type="text/css" href="css/bootstrap/bootstrap.css" />
+    <link rel="stylesheet" type="text/css" href="css/bootstrap/bootstrap-theme.css" />
+    <link rel="stylesheet" type="text/css" href="css/swc.css" />
+    <link rel="alternate" type="application/rss+xml" title="Software Carpentry Blog" href="http://software-carpentry.org/feed.xml"/>
+    <meta charset="UTF-8" />
+    <!-- HTML5 shim, for IE6-8 support of HTML5 elements -->
+    <!--[if lt IE 9]>
+      <script src="http://html5shim.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
+  </head>
+  <body class="lesson">
+    <div class="container card">
+      <div class="banner">
+        <a href="http://software-carpentry.org" title="Software Carpentry">
+          <img alt="Software Carpentry banner" src="img/software-carpentry-banner.png" />
+        </a>
+      </div>
+      <article>
+      <div class="row">
+        <div class="col-md-10 col-md-offset-1">
+                    <a href="index.html"><h1 class="title">자동화와 Make</h1></a>
+          <h2 class="subtitle">데이터와 코드에 걸린 의존성</h2>
+          <section class="objectives panel panel-warning">
+<div class="panel-heading">
+<h2 id="학습-목표"><span class="glyphicon glyphicon-certificate"></span>학습 목표</h2>
+</div>
+<div class="panel-body">
+<ul>
+<li>출력 파일은 입력 파일에 대한 제품일 뿐만 아니라, 출력파일을 만들어 내는 코드 혹은 스크립트에 대한 제품이기도 하다.</li>
+<li>거짓 의존성을 인지하고 회피한다.</li>
+</ul>
+</div>
+</section>
+<p>지금까지 작성한 Makefile은 다음과 같다:</p>
+<pre class="make"><code># Count words.
+.PHONY : dats
+dats : isles.dat abyss.dat last.dat
+
+isles.dat : books/isles.txt
+    python wordcount.py $&lt; $@
+
+abyss.dat : books/abyss.txt
+    python wordcount.py $&lt; $@
+
+last.dat : books/last.txt
+    python wordcount.py $&lt; $@
+
+# Generate archive file.
+analysis.tar.gz : *.dat
+    tar -czf $@ $^
+
+.PHONY : clean
+clean :
+        rm -f *.dat
+        rm -f analysis.tar.gz</code></pre>
+<p>데이터 파일은 텍스트 파일에 대한 제품이기도 하지만, 텍스트 파일을 처리하고 데이터 파일을 생성하는 <code>wordcount.py</code>, 스크립트에 대한 제품이기도 하다. 또한, <code>wordcount.py</code> 파일을 데이터 파일에 대한 의존성으로 추가해야만 된다:</p>
+<pre class="make"><code>isles.dat : books/isles.txt wordcount.py
+    python wordcount.py $&lt; $@
+
+abyss.dat : books/abyss.txt wordcount.py
+    python wordcount.py $&lt; $@
+
+last.dat : books/last.txt wordcount.py
+    python wordcount.py $&lt; $@</code></pre>
+<p><code>wordcount.py</code> 프로그램을 편집한 척하고, Make를 재실행하면,</p>
+<div class="sourceCode"><pre class="sourceCode bash"><code class="sourceCode bash">$ <span class="kw">touch</span> wordcount.py
+$ <span class="kw">make</span> dats</code></pre></div>
+<p>다음 결과를 얻게 된다:</p>
+<pre class="output"><code>python wordcount.py books/isles.txt isles.dat
+python wordcount.py books/abyss.txt abyss.dat
+python wordcount.py books/last.txt last.dat</code></pre>
+<p><code>wordcount.py</code> 파일을 <code>.dat</code> 파일에 의존성으로 추가한 후, <code>analysis.tar.gz</code>에 명기된 대상을 빌드하는데 관여된 의존성을 도식화했는데, Makefile에서 구현된 사항이 다음 그림에 나와 있다:</p>
+<div class="figure">
+<img src="img/04-dependencies.png" title="analysis.tar.gz dependencies after adding wordcount.py as a dependency" alt="wordcount.py 파일을 의존성으로 추가한 후에, analysis.tar.gz 의존성" />
+<p class="caption">wordcount.py 파일을 의존성으로 추가한 후에, analysis.tar.gz 의존성</p>
+</div>
+<aside class="callout panel panel-info">
+<div class="panel-heading">
+<h2 id="txt-파일은-wordcount.py-파일에-의존성을-갖지-않는가"><span class="glyphicon glyphicon-pushpin"></span><code>.txt</code> 파일은 <code>wordcount.py</code> 파일에 의존성을 갖지 않는가?</h2>
+</div>
+<div class="panel-body">
+<p><code>.txt</code> 파일은 입력 파일이며 어떤 의존성도 갖지 않는다. 입력파일이 <code>wordcount.py</code> 파일에 의존성을 만드려면, <a href="reference.html#false-dependency">거짓 의존성</a>(false dependency) 도입이 필요하다.</p>
+</div>
+</aside>
+<p>분석 스크립트를 문서기록보관 아카이브에도 추가하자:</p>
+<pre class="make"><code>analysis.tar.gz : *.dat wordcount.py
+        tar -czf $@ $^</code></pre>
+<p>Make를 재실행하면,</p>
+<div class="sourceCode"><pre class="sourceCode bash"><code class="sourceCode bash">$ <span class="kw">make</span> analysis.tar.gz</code></pre></div>
+<p>다음 결과를 얻게 된다:</p>
+<pre class="output"><code>tar -czf analysis.tar.gz abyss.dat isles.dat last.dat wordcount.py</code></pre>
+        </div>
+      </div>
+      </article>
+      <div class="footer">
+        <a class="label swc-blue-bg" href="http://software-carpentry.org">Software Carpentry</a>
+        <a class="label swc-blue-bg" href="https://github.com/swcarpentry/lesson-template">Source</a>
+        <a class="label swc-blue-bg" href="mailto:admin@software-carpentry.org">Contact</a>
+        <a class="label swc-blue-bg" href="LICENSE.html">License</a>
+      </div>
+    </div>
+    <!-- Javascript placed at the end of the document so the pages load faster -->
+    <script src="http://software-carpentry.org/v5/js/jquery-1.9.1.min.js"></script>
+    <script src="css/bootstrap/bootstrap-js/bootstrap.js"></script>
+  </body>
+</html>

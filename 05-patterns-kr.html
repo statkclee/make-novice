@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8">
+    <meta name="generator" content="pandoc">
+    <title>Software Carpentry: 자동화와 Make</title>
+    <link rel="shortcut icon" type="image/x-icon" href="/favicon.ico" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link rel="stylesheet" type="text/css" href="css/bootstrap/bootstrap.css" />
+    <link rel="stylesheet" type="text/css" href="css/bootstrap/bootstrap-theme.css" />
+    <link rel="stylesheet" type="text/css" href="css/swc.css" />
+    <link rel="alternate" type="application/rss+xml" title="Software Carpentry Blog" href="http://software-carpentry.org/feed.xml"/>
+    <meta charset="UTF-8" />
+    <!-- HTML5 shim, for IE6-8 support of HTML5 elements -->
+    <!--[if lt IE 9]>
+      <script src="http://html5shim.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
+  </head>
+  <body class="lesson">
+    <div class="container card">
+      <div class="banner">
+        <a href="http://software-carpentry.org" title="Software Carpentry">
+          <img alt="Software Carpentry banner" src="img/software-carpentry-banner.png" />
+        </a>
+      </div>
+      <article>
+      <div class="row">
+        <div class="col-md-10 col-md-offset-1">
+                    <a href="index.html"><h1 class="title">자동화와 Make</h1></a>
+          <h2 class="subtitle">패턴 규칙</h2>
+          <section class="objectives panel panel-warning">
+<div class="panel-heading">
+<h2 id="학습-목표"><span class="glyphicon glyphicon-certificate"></span>학습 목표</h2>
+</div>
+<div class="panel-body">
+<ul>
+<li>Make 패턴 규칙을 작성한다.</li>
+<li>Make 와일드-카드 <code>%</code>를 대상과 의존성에 사용한다.</li>
+<li>Make 특수 변수 <code>$*</code>을 동작에 사용한다.</li>
+<li>규칙에는 Make 와일드-카드 사용을 회피한다.</li>
+</ul>
+</div>
+</section>
+<p>Makefile에는 여전히 반복되는 콘텐츠가 있다. 텍스트 파일과 데이터 파일 명칭을 제외하고 각 <code>.dat</code> 파일에 대한 규칙은 동일한다. 이러한 규칙을 단일 <a href="reference.html#pattern-rule">패턴 규칙</a>(pattern rule)으로 교체할 수 있는데, 패턴 규칙을 사용해서 <code>books/</code> 디렉토리에 <code>.txt</code> 파일을 임의 <code>.dat</code> 파일로 빌드한다:</p>
+<pre class="make"><code>%.dat : books/%.txt wordcount.py
+        python wordcount.py $&lt; $*.dat</code></pre>
+<p><code>%</code>는 Make <a href="reference.html#wild-card">와일드-카드</a>(wild-card)다. <code>$*</code>은 특수 변수로, 특수변수가 <a href="reference.html#stem">스템</a>(stem)을 규칙이 매칭하는 것으로 치환한다.</p>
+<p>만약 Make를 다시 실행하면,</p>
+<div class="sourceCode"><pre class="sourceCode bash"><code class="sourceCode bash">$ <span class="kw">make</span> clean
+$ <span class="kw">make</span> dats</code></pre></div>
+<p>다음 결과를 얻게 된다:</p>
+<pre class="output"><code>python wordcount.py books/isles.txt isles.dat
+python wordcount.py books/abyss.txt abyss.dat
+python wordcount.py books/last.txt last.dat</code></pre>
+<aside class="callout panel panel-info">
+<div class="panel-heading">
+<h2 id="make-와일드-카드-사용하기"><span class="glyphicon glyphicon-pushpin"></span>Make 와일드-카드 사용하기</h2>
+</div>
+<div class="panel-body">
+<p>Make <code>%</code> 와일드-카드는 대상과 해당 의존성에만 사용될 수 있다. 동작에는 사용될 수가 없다. 하지만, 동작에서 <code>$*</code>을 사용할 수 있는데, 스템이 규칙이 매칭하는 것으로 치환한다.</p>
+</div>
+</aside>
+<p>Makefile은 이제 훨씬 더 짧아졌고, 깨끗해졌다:</p>
+<pre class="make"><code># Count words.
+.PHONY : dats
+dats : isles.dat abyss.dat last.dat
+
+%.dat : books/%.txt wordcount.py
+    python wordcount.py $&lt; $*.dat
+
+# Generate archive file.
+analysis.tar.gz : *.dat wordcount.py
+    tar -czf $@ $^
+
+.PHONY : clean
+clean :
+        rm -f *.dat
+        rm -f analysis.tar.gz</code></pre>
+        </div>
+      </div>
+      </article>
+      <div class="footer">
+        <a class="label swc-blue-bg" href="http://software-carpentry.org">Software Carpentry</a>
+        <a class="label swc-blue-bg" href="https://github.com/swcarpentry/lesson-template">Source</a>
+        <a class="label swc-blue-bg" href="mailto:admin@software-carpentry.org">Contact</a>
+        <a class="label swc-blue-bg" href="LICENSE.html">License</a>
+      </div>
+    </div>
+    <!-- Javascript placed at the end of the document so the pages load faster -->
+    <script src="http://software-carpentry.org/v5/js/jquery-1.9.1.min.js"></script>
+    <script src="css/bootstrap/bootstrap-js/bootstrap.js"></script>
+  </body>
+</html>
